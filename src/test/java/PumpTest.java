@@ -19,7 +19,7 @@ public class PumpTest {
     }
 
     @Test
-    public void PumpOn_HighPressure_False(){
+    public void isPumpOn_HighPressure_False(){
         valve.close();
         pump.act(valve);
 
@@ -29,7 +29,7 @@ public class PumpTest {
     }
 
     @Test
-    public void PumpOn_LowPressure_True(){
+    public void isPumpOn_LowPressure_True(){
         valve.open();
         pump.act(valve);
 

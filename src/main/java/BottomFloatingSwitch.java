@@ -16,6 +16,10 @@ public class BottomFloatingSwitch implements IFloatingSwitch {
         hasWater = true;
     }
 
+    public boolean getSimpleState(){
+        return hasWater;
+    }
+
     public boolean getState(){
         System.out.println("Датчик уровня " + name + (hasWater ? ": есть вода" : ": вода закончилась"));
         return hasWater;

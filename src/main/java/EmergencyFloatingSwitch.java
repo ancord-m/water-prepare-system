@@ -15,6 +15,10 @@ public class EmergencyFloatingSwitch implements IFloatingSwitch{
         hasWater = true;
     }
 
+    public boolean getSimpleState(){
+        return hasWater;
+    }
+
     public boolean getState(){
         if(hasWater) {
             System.out.println("Переполнение. Отключение насоса.");

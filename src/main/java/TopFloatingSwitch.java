@@ -16,6 +16,10 @@ public class TopFloatingSwitch implements IFloatingSwitch {
         hasWater = true;
     }
 
+    public boolean getSimpleState(){
+        return hasWater;
+    }
+
     public boolean getState(){
         System.out.println("Поплавковый выключатель " + name + (hasWater ? ": есть вода" : ": вода закончилась"));
         return hasWater;

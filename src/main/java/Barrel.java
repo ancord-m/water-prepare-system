@@ -1,8 +1,7 @@
 import interfaces.IFloatingSwitch;
 
 public class Barrel {
-    private boolean full;
-    private boolean empty;
+    private boolean active;
 
     private String name;
     private IFloatingSwitch topSwitch;
@@ -13,11 +12,12 @@ public class Barrel {
 
     public Barrel(String name){
         this.name = name;
-        topSwitch = new TopFloatingSwitch("верхний");
-        bottomSwitch = new BottomFloatingSwitch("нижний");
+        active = false;
+        topSwitch = new TopFloatingSwitch("TOP");
+        bottomSwitch = new BottomFloatingSwitch("BOTTOM");
         emergencySwitch = new EmergencyFloatingSwitch();
-        inputValve = new BallValve("входной");
-        outputValve = new BallValve("выходной");
+        inputValve = new BallValve("IN");
+        outputValve = new BallValve("OUT");
     }
 
     public IFloatingSwitch getEmergencySwitch() {
@@ -44,18 +44,32 @@ public class Barrel {
         return outputValve;
     }
 
-    public void getState(){
-        StringBuilder result = new StringBuilder("Бочка " + name + " ");
+    public boolean isActive(){
+        return active;
+    }
 
-        if(topSwitch.getState() && bottomSwitch.getState()){
+    public void setIsActive(boolean active){
+        this.active = active;
+        if(this.active) {
+            outputValve.open();
+        } else {
+            outputValve.close();
+        }
+    }
+
+    public void getState(){
+        StringBuilder result =
+                new StringBuilder("Бочка " + name +  (active ? " активна и " : " не активна и "));
+
+        if(topSwitch.getSimpleState() && bottomSwitch.getSimpleState()){
             result.append("полная");
         }
 
-        if(!topSwitch.getState() && bottomSwitch.getState()){
+        if(!topSwitch.getSimpleState() && bottomSwitch.getSimpleState()){
             result.append("расходуется");
         }
 
-        if(!topSwitch.getState() && !bottomSwitch.getState()) {
+        if(!topSwitch.getSimpleState() && !bottomSwitch.getSimpleState()) {
             result.append("пустая");
         }
 

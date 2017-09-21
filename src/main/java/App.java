@@ -8,28 +8,20 @@ public class App {
     static Pump inputPump;
 
     public static void main(String[] args) throws Exception{
-        init();
+        appInit();
+
+        switchOnInit();
 
         while (!barrel_one.getEmergencySwitch().getState() &&
                 !barrel_two.getEmergencySwitch().getState()) {
 
-            barrel_one.getState();
-            barrel_two.getState();
 
-            //systemStateCode = getSystemState();
-            if(!barrel_one.getTopSwitch().getSimpleState()
-                && !barrel_one.getBottomSwitch().getSimpleState()){
-                barrel_one.setIsActive(false);
-                barrel_two.setIsActive(true);
-                inputPump.act(barrel_two.getInputValve());
-            }
 
-            System.out.println("\n\n\n");
             Thread.sleep(3000);
         }
     }
 
-    public static void init(){
+    static void appInit(){
         barrel_one = new Barrel("1");
         barrel_two = new Barrel("2");
 
@@ -53,6 +45,26 @@ public class App {
         waterConsumer.start();
     }
 
+    static void switchOnInit(){
+
+    }
+
+    static void BarrelSwitching(){
+
+    }
+
+    static void fillBarrel(){
+
+    }
+
+    static void doseNaOCl(){
+
+    }
+
+    static void ColumnWash(){
+
+    }
+
     static class WaterConsumer extends Thread{
         public void run() {
             IValve consumerValve = new ConsumerValve();
@@ -74,7 +86,7 @@ public class App {
         }
     }
 
-    public static void consumeWater(){
+    static void consumeWater(){
         /*Определяем активную бочку и иммитируем поэтапную откачку воды
         * Сначала бочка получает статус "расходуется", а затем "пуста"
         */

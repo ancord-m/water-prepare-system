@@ -16,8 +16,8 @@ public class TopFloatingSwitch implements IFloatingSwitch {
         hasWater = true;
     }
 
-    public boolean getSimpleState(){
-        return hasWater;
+    public int getSimpleState(){
+        return hasWater ? 1 : 0;
     }
 
     public boolean getState(){

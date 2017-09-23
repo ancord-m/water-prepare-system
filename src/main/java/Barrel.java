@@ -61,7 +61,7 @@ public class Barrel {
         StringBuilder result =
                 new StringBuilder("Бочка " + name +  (active ? " активна и " : " не активна и "));
 
-        if(topSwitch.getSimpleState() && bottomSwitch.getSimpleState()){
+      /*  if(topSwitch.getSimpleState() && bottomSwitch.getSimpleState()){
             result.append("полная");
         }
 
@@ -73,6 +73,6 @@ public class Barrel {
             result.append("пустая");
         }
 
-        System.out.println(result);
+        System.out.println(result);*/
     }
 }

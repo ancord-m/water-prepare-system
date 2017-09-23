@@ -6,6 +6,8 @@ public class App {
     static Barrel barrel_one;
     static Barrel barrel_two;
     static Pump inputPump;
+    static int[] systemState = new int[4];
+    static int decSystemState;
 
     public static void main(String[] args) throws Exception{
         appInit();
@@ -15,7 +17,45 @@ public class App {
         while (!barrel_one.getEmergencySwitch().getState() &&
                 !barrel_two.getEmergencySwitch().getState()) {
 
+            switch (getSystemState()) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                case 9:
+                    break;
+                case 10:
+                    break;
+                case 11:
+                    break;
+                case 12:
+                    break;
+                case 13:
+                    break;
+                case 14:
+                    break;
+                case 15:
+                    break;
+            }
 
+
+
+            //System.out.println(decSystemState);
+            //printSystemState();
 
             Thread.sleep(3000);
         }
@@ -65,6 +105,34 @@ public class App {
 
     }
 
+    /**
+     * Состояние системы будет описываться младшими битами одного байта
+     * @return десятичное число от 0 до F, на основании которого выбирается действие
+     */
+    static int getSystemState(){
+        Double result;
+
+        systemState[0] = barrel_one.getBottomSwitch().getSimpleState();
+        systemState[1] = barrel_one.getTopSwitch().getSimpleState();
+        systemState[2] = barrel_two.getBottomSwitch().getSimpleState();
+        systemState[3] = barrel_two.getTopSwitch().getSimpleState();
+
+        result =
+                systemState[0] * Math.pow(2, 3) +
+                systemState[1] * Math.pow(2, 2) +
+                systemState[2] * Math.pow(2, 1) +
+                systemState[3] * Math.pow(2, 0);
+
+        return result.intValue();
+    }
+
+    static void printSystemState(){
+        for(int i = 0; i < systemState.length; i++){
+            System.out.print(systemState[i]);
+        }
+        System.out.println();
+    }
+
     static class WaterConsumer extends Thread{
         public void run() {
             IValve consumerValve = new ConsumerValve();
@@ -78,34 +146,20 @@ public class App {
                         barrel_one.getEmergencySwitch().up();
                         break;
                     case 2:
-                        consumerValve.open();
-                        consumeWater();
+                        barrel_one.getBottomSwitch().down();
+                        break;
+                    case 3:
+                        barrel_one.getTopSwitch().down();
+                        break;
+                    case 4:
+                        barrel_two.getBottomSwitch().down();
+                        break;
+                    case 5:
+                        barrel_two.getTopSwitch().down();
                         break;
                 }
             } while (var != -1);
         }
     }
 
-    static void consumeWater(){
-        /*Определяем активную бочку и иммитируем поэтапную откачку воды
-        * Сначала бочка получает статус "расходуется", а затем "пуста"
-        */
-        if(barrel_one.isActive()) {
-            if(barrel_one.getTopSwitch().getSimpleState()
-                    && barrel_one.getBottomSwitch().getSimpleState()){
-                barrel_one.getTopSwitch().down();
-            } else if (!barrel_one.getTopSwitch().getSimpleState()
-                    && barrel_one.getBottomSwitch().getSimpleState()){
-                barrel_one.getBottomSwitch().down();
-            }
-        } else if(barrel_two.isActive()){
-            if(barrel_two.getTopSwitch().getSimpleState()
-                    && barrel_two.getBottomSwitch().getSimpleState()){
-                barrel_two.getTopSwitch().down();
-            } else if(!barrel_two.getTopSwitch().getSimpleState()
-                    && barrel_two.getBottomSwitch().getSimpleState()){
-                barrel_two.getBottomSwitch().down();
-            }
-        }
-    }
 }

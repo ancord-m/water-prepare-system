@@ -9,6 +9,7 @@ public class Barrel {
     private IFloatingSwitch emergencySwitch;
     private BallValve inputValve;
     private BallValve outputValve;
+    private boolean filling;
 
     public Barrel(String name){
         this.name = name;
@@ -18,6 +19,7 @@ public class Barrel {
         emergencySwitch = new EmergencyFloatingSwitch();
         inputValve = new BallValve("IN");
         outputValve = new BallValve("OUT");
+        filling = false;
     }
 
     public IFloatingSwitch getEmergencySwitch() {
@@ -42,6 +44,14 @@ public class Barrel {
 
     public BallValve getOutputValve() {
         return outputValve;
+    }
+
+    public void setFilling(boolean f) {
+        this.filling = f;
+    }
+
+    public boolean isFilling(){
+        return filling;
     }
 
     public boolean isActive(){

@@ -1,5 +1,5 @@
 public class DosingPump {
-    void injectNaClO(){
+    static void injectNaClO(){
         System.out.println("Дозация выполнена");
     }
 }

@@ -17,45 +17,24 @@ public class App {
         while (!barrel_one.getEmergencySwitch().getState() &&
                 !barrel_two.getEmergencySwitch().getState()) {
 
-            switch (getSystemState()) {
+            int code = getSystemState();
+            switch (code) {
                 case 0:
                     break;
-                case 1:
-                    break;
-                case 2:
-                    break;
                 case 3:
-                    break;
-                case 4:
-                    break;
-                case 5:
-                    break;
-                case 6:
-                    break;
-                case 7:
-                    break;
-                case 8:
-                    break;
-                case 9:
-                    break;
-                case 10:
-                    break;
-                case 11:
+                    switchToSecondBarrel();
                     break;
                 case 12:
-                    break;
-                case 13:
-                    break;
-                case 14:
+                    switchToFirstBarrel();
                     break;
                 case 15:
                     break;
+                default:
+                   // System.out.println(getSystemState());
             }
 
-
-
-            //System.out.println(decSystemState);
-            //printSystemState();
+            System.out.print(code + "\t");
+            printSystemState();
 
             Thread.sleep(3000);
         }
@@ -86,19 +65,54 @@ public class App {
     }
 
     static void switchOnInit(){
+        //TODO восстанавливать состояния бочек (расходуется/наполняется) из EEPROM
 
     }
 
-    static void BarrelSwitching(){
+    static void switchToFirstBarrel() throws Exception{
+        barrel_one.getOutputValve().open();
+        barrel_one.getOutputValve().state();
 
+        barrel_two.getOutputValve().close();
+        barrel_two.getOutputValve().state();
+
+        barrel_one.setIsActive(true);
+
+        doseNaOCl();
+
+        fillBarrel(barrel_two);
     }
 
-    static void fillBarrel(){
+    static void switchToSecondBarrel() throws Exception{
+        barrel_two.getOutputValve().open();
+        barrel_two.getOutputValve().state();
 
+        barrel_one.getOutputValve().close();
+        barrel_one.getOutputValve().state();
+
+        barrel_two.setIsActive(true);
+
+        doseNaOCl();
+
+        fillBarrel(barrel_one);
     }
+
+    static void fillBarrel(Barrel barrel) throws Exception{
+        System.out.println("Бочка " + barrel.getName());
+        barrel.getInputValve().open();
+        barrel.getInputValve().state();
+
+        System.out.println("Бочка " + barrel.getName() + " заполняется...");
+        barrel.getBottomSwitch().up();
+        Thread.sleep(5000);
+        barrel.getTopSwitch().up();
+        System.out.println("полная!");
+        barrel.getInputValve().close();
+        barrel.getInputValve().state();
+}
 
     static void doseNaOCl(){
-
+        DosingPump.injectNaClO();
     }
 
     static void ColumnWash(){

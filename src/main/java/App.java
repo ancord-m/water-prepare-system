@@ -3,53 +3,59 @@ import interfaces.IValve;
 import java.util.Scanner;
 
 public class App {
-    static Barrel barrel_one;
-    static Barrel barrel_two;
-    static Pump inputPump;
     static int[] systemState = new int[4];
     static int decSystemState;
 
     public static void main(String[] args) throws Exception{
-        appInit();
+        Barrel barrel_one = new Barrel("Бочка 1");
+        Barrel barrel_two = new Barrel("Бочка 2");
+        Pump inputPump = new Pump("IN-PUMP");
 
-        switchOnInit();
+        appInit(barrel_one, barrel_two);
+
+        switchOnInit(barrel_one, barrel_two);
 
         while (!barrel_one.getEmergencySwitch().getState() &&
                 !barrel_two.getEmergencySwitch().getState()) {
 
-            int code = getSystemState();
+            int code = getSystemState(barrel_one, barrel_two);
             switch (code) {
                 case 0:
+                    doseNaOCl();
+                    fillBarrel(barrel_one);
+                    Thread.sleep(10000);
+                    doseNaOCl();
+                    fillBarrel(barrel_two);
+                    barrel_one.getOutputValve().open();
+                    barrel_one.setIsActive(true);
                     break;
                 case 3:
-                    switchToSecondBarrel();
+                    switchBarrels(barrel_two, barrel_one);
+                    doseNaOCl();
+                    fillBarrel(barrel_one);
                     break;
                 case 12:
-                    switchToFirstBarrel();
-                    break;
-                case 15:
+                    switchBarrels(barrel_one, barrel_two);
+                    doseNaOCl();
+                    fillBarrel(barrel_two);
                     break;
                 default:
                    // System.out.println(getSystemState());
             }
 
-            System.out.print(code + "\t");
-            printSystemState();
+            printSystemState(barrel_one, barrel_two, code);
 
             Thread.sleep(3000);
         }
     }
 
-    static void appInit(){
-        barrel_one = new Barrel("1");
-        barrel_two = new Barrel("2");
-
+    static void appInit(Barrel barrel_one, Barrel barrel_two){
         barrel_one.getEmergencySwitch().down();
         barrel_one.getTopSwitch().up();
         barrel_one.getBottomSwitch().up();
         barrel_one.getInputValve().close();
-        barrel_one.getOutputValve().open();
-        barrel_one.setIsActive(true);
+        barrel_one.getOutputValve().close();
+        barrel_one.setIsActive(false);
 
         barrel_two.getEmergencySwitch().down();
         barrel_two.getTopSwitch().up();
@@ -58,57 +64,56 @@ public class App {
         barrel_two.getOutputValve().close();
         barrel_two.setIsActive(false);
 
-        inputPump = new Pump("Н1");
-
-        WaterConsumer waterConsumer = new WaterConsumer();
+        WaterConsumer waterConsumer = new WaterConsumer(barrel_one, barrel_two);
         waterConsumer.start();
     }
 
-    static void switchOnInit(){
+    static void switchOnInit(Barrel barrel_one, Barrel barrel_two){
         //TODO восстанавливать состояния бочек (расходуется/наполняется) из EEPROM
+        barrel_one.getTopSwitch().down();
+        barrel_one.getBottomSwitch().down();
 
+        barrel_two.getTopSwitch().down();
+        barrel_two.getBottomSwitch().down();
+
+        printSystemState(barrel_one, barrel_two, getSystemState(barrel_one, barrel_two));
     }
 
-    static void switchToFirstBarrel() throws Exception{
-        barrel_one.getOutputValve().open();
-        barrel_one.getOutputValve().state();
+    static void switchBarrels(Barrel toBeActivated, Barrel toBeDisabled) throws Exception{
+        System.out.println("--- Переключение бочек ---");
+        System.out.print("Активация " + toBeActivated.getName() + ": ");
+        toBeActivated.getOutputValve().open();
+        toBeActivated.getOutputValve().state();
+        toBeActivated.setIsActive(true);
 
-        barrel_two.getOutputValve().close();
-        barrel_two.getOutputValve().state();
-
-        barrel_one.setIsActive(true);
-
-        doseNaOCl();
-
-        fillBarrel(barrel_two);
+        System.out.print("Деактивация " + toBeDisabled.getName() + ": ");
+        toBeDisabled.getOutputValve().close();
+        toBeDisabled.getOutputValve().state();
+        toBeDisabled.setIsActive(false);
     }
 
-    static void switchToSecondBarrel() throws Exception{
-        barrel_two.getOutputValve().open();
-        barrel_two.getOutputValve().state();
+    static void fillBarrel(Barrel barrel) {
+        System.out.println("--- Заполнение " + barrel.getName() + " ---");
+        new Thread(new Runnable () {
+            @Override
+            public void run(){
+                barrel.getState();
+                barrel.getInputValve().open();
+                barrel.getInputValve().state();
 
-        barrel_one.getOutputValve().close();
-        barrel_one.getOutputValve().state();
-
-        barrel_two.setIsActive(true);
-
-        doseNaOCl();
-
-        fillBarrel(barrel_one);
-    }
-
-    static void fillBarrel(Barrel barrel) throws Exception{
-        System.out.println("Бочка " + barrel.getName());
-        barrel.getInputValve().open();
-        barrel.getInputValve().state();
-
-        System.out.println("Бочка " + barrel.getName() + " заполняется...");
-        barrel.getBottomSwitch().up();
-        Thread.sleep(5000);
-        barrel.getTopSwitch().up();
-        System.out.println("полная!");
-        barrel.getInputValve().close();
-        barrel.getInputValve().state();
+                barrel.getBottomSwitch().up();
+                barrel.getState();
+                try {
+                    Thread.sleep(8000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                barrel.getTopSwitch().up();
+                barrel.getState();
+                barrel.getInputValve().close();
+                barrel.getInputValve().state();
+            }
+        }).start();
 }
 
     static void doseNaOCl(){
@@ -123,7 +128,7 @@ public class App {
      * Состояние системы будет описываться младшими битами одного байта
      * @return десятичное число от 0 до F, на основании которого выбирается действие
      */
-    static int getSystemState(){
+    static int getSystemState(Barrel barrel_one, Barrel barrel_two){
         Double result;
 
         systemState[0] = barrel_one.getBottomSwitch().getSimpleState();
@@ -140,14 +145,28 @@ public class App {
         return result.intValue();
     }
 
-    static void printSystemState(){
+    static void printSystemState(Barrel barrel_one, Barrel barrel_two, int code){
+        System.out.println(">>> Состояние системы <<<");
+        barrel_one.getState();
+        barrel_two.getState();
+        System.out.print("Код состояния: DEC " + code + " BIN ");
         for(int i = 0; i < systemState.length; i++){
             System.out.print(systemState[i]);
         }
         System.out.println();
+        System.out.println(">>> Конец <<<");
+        System.out.println();
     }
 
     static class WaterConsumer extends Thread{
+        Barrel barrel_one;
+        Barrel barrel_two;
+
+        public WaterConsumer(Barrel barrel_one, Barrel barrel_two){
+            this.barrel_one = barrel_one;
+            this.barrel_two = barrel_two;
+        }
+
         public void run() {
             IValve consumerValve = new ConsumerValve();
             Scanner sc = new Scanner(System.in);

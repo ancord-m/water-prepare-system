@@ -69,20 +69,20 @@ public class Barrel {
 
     public void getState(){
         StringBuilder result =
-                new StringBuilder("Бочка " + name +  (active ? " активна и " : " не активна и "));
+                new StringBuilder(name +  (active ? " активна и " : " не активна и "));
 
-      /*  if(topSwitch.getSimpleState() && bottomSwitch.getSimpleState()){
+        if(topSwitch.getSimpleState() == 1 && bottomSwitch.getSimpleState() == 1){
             result.append("полная");
         }
 
-        if(!topSwitch.getSimpleState() && bottomSwitch.getSimpleState()){
-            result.append("расходуется");
+        if(topSwitch.getSimpleState() == 0 && bottomSwitch.getSimpleState() == 1){
+            result.append("расходуется или заполняется");
         }
 
-        if(!topSwitch.getSimpleState() && !bottomSwitch.getSimpleState()) {
+        if(topSwitch.getSimpleState() == 0 && bottomSwitch.getSimpleState() == 0) {
             result.append("пустая");
         }
 
-        System.out.println(result);*/
+        System.out.println(result);
     }
 }

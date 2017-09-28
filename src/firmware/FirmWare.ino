@@ -4,12 +4,30 @@
 
 int ssCode = 0; // system state code
 
+struct Barrel {
+  bool wasting;
+  char name[15];
+  byte bottomSwitch;
+  byte topSwitch;
+  byte inValve;
+  byte outValve;
+} barrel_one, barrel_two;
+
 void setup(){
-    pinMode(NACLO, OUTPUT);
-    pinMode(FB_BS, INPUT);
-    pinMode(FB_TS, INPUT);
-    pinMode(SB_BS, INPUT);
-    pinMode(SB_TS, INPUT);
+  Serial.begin(9600);
+  pinMode(FB_BS, INPUT_PULLUP);
+  pinMode(FB_TS, INPUT_PULLUP);
+  pinMode(SB_BS, INPUT_PULLUP);
+  pinMode(SB_TS, INPUT_PULLUP);
+
+  pinMode(FB_IN, OUTPUT);
+  pinMode(FB_OUT, OUTPUT);
+  pinMode(SB_IN, OUTPUT);
+  pinMode(SB_OUT, OUTPUT);
+  digitalWrite(FB_IN, HIGH);
+  digitalWrite(FB_OUT, HIGH);
+  digitalWrite(SB_IN, HIGH);
+  digitalWrite(SB_OUT, HIGH);
 }
 
 void loop(){
@@ -32,6 +50,7 @@ void loop(){
     }
 
     delay(COMMON_DELAY);
+    Serial.println(ssCode);
 }
 
 void getSystemState(){
@@ -50,10 +69,40 @@ void doseNaClO(){
     }
 }
 
-void switchToFirstBarrel(){
+void fillFirstBarrel(){
+  digitalWrite(FB_IN, LOW);
+  while(digitalRead(FB_TS) != 1){
+    Serial.println("Waiting for the FIRST barrel to be filled...");
+    delay(1000);
+  }
+  digitalWrite(FB_IN, HIGH);
+}
 
+void fillSecondBarrel(){
+    digitalWrite(SB_IN, LOW);
+  while(digitalRead(SB_TS) != 1){
+    Serial.println("Waiting for the SECOND barrel to be filled...");
+    delay(1000);
+  }
+  digitalWrite(SB_IN, HIGH);
+}
+
+void switchToFirstBarrel(){
+  Serial.println("Switching to FIRST barrel. CODE: " + ssCode);
+  digitalWrite(FB_OUT, LOW);
+  Serial.println("FIRST OUT valve opened");
+  delay(1000);
+  Serial.println("SECOND OUT valve closed");
+  digitalWrite(SB_OUT, HIGH);
+  delay(1000);
 }
 
 void switchToSecondBarrel(){
-
+  Serial.println("Switching to SECOND barrel. CODE: " + ssCode);
+  digitalWrite(SB_OUT, LOW);
+  Serial.println("SECOND OUT valve opened");
+  delay(1000);
+  digitalWrite(FB_OUT, HIGH);
+  Serial.println("FIRST OUT valve closed");
+  delay(1000);
 }
